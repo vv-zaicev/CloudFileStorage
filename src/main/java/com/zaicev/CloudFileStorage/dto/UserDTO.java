@@ -1,4 +1,4 @@
-package com.zaicev.CloudFileStorage.DTO;
+package com.zaicev.CloudFileStorage.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
