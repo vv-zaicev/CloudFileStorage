@@ -6,11 +6,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 
 import com.zaicev.CloudFileStorage.security.services.UserDetailsServiceImpl;
 
@@ -40,9 +43,32 @@ public class SecurityConfig {
 		httpSecurity
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("sign-up", "sign-in").permitAll().anyRequest().authenticated());
+						auth -> auth
+								.requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/logout")
+								.permitAll()
+								.anyRequest()
+								.authenticated())
+				.formLogin(form -> form
+						.loginProcessingUrl("/api/auth/signin")
+						.successHandler((request, response, auth) -> {
+							response.setStatus(200);
+							response.getWriter().write("Succes");
+						})
+						.failureHandler((request, response, ex) -> {
+							response.setStatus(401);
+							response.getWriter().write("Denied");
+						}))
+				.sessionManagement(session -> session
+						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
 		return httpSecurity.build();
+	}
+
+	@Bean
+	SpringSessionRememberMeServices rememberMeServices() {
+		SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
+		rememberMeServices.setAlwaysRemember(true);
+		return rememberMeServices;
 	}
 
 }
