@@ -8,16 +8,10 @@ import org.springframework.session.web.http.HeaderHttpSessionIdResolver;
 import org.springframework.session.web.http.HttpSessionIdResolver;
 
 @Configuration
-@EnableRedisHttpSession
 public class SessionConfig {
 
 	@Bean
-	LettuceConnectionFactory connectionFactory() {
-		return new LettuceConnectionFactory();
-	}
-	
-	@Bean
 	HttpSessionIdResolver httpSessionIdResolver() {
-	    return HeaderHttpSessionIdResolver.xAuthToken(); 
+		return HeaderHttpSessionIdResolver.xAuthToken();
 	}
 }
