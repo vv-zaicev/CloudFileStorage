@@ -44,7 +44,7 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(
 						auth -> auth
-								.requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/logout")
+								.requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/signout")
 								.permitAll()
 								.anyRequest()
 								.authenticated())
@@ -58,6 +58,8 @@ public class SecurityConfig {
 							response.setStatus(401);
 							response.getWriter().write("Denied");
 						}))
+				.logout(logout -> logout
+						.logoutUrl("/api/auth/signout"))
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
