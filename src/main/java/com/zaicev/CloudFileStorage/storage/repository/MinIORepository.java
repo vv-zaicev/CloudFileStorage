@@ -71,6 +71,21 @@ public class MinIORepository {
 		}
 	}
 
+	public boolean isObjectExist(String path) throws IOException, MinioException, GeneralSecurityException{
+		try {
+			StatObjectResponse stat = minioClient.statObject(StatObjectArgs.builder()
+					.bucket(USER_BUCKET_NAME)
+					.object(path)
+					.build());
+			return true;
+		} catch (ErrorResponseException e) {
+			if (e.errorResponse().code().equals("NoSuchKey")) {
+				log.warn("StorageObjectNotFound: {}", path);
+			}
+			return false;
+		}
+	}
+
 	public InputStream getObject(String path) throws IOException, MinioException, GeneralSecurityException {
 		try {
 			InputStream stream = minioClient.getObject(GetObjectArgs.builder()
