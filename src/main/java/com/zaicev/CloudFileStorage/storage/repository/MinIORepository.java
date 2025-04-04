@@ -71,8 +71,9 @@ public class MinIORepository {
 		}
 	}
 
-	public boolean isObjectExist(String path) throws IOException, MinioException, GeneralSecurityException{
+	public boolean isObjectExist(String path) throws IOException, MinioException, GeneralSecurityException {
 		try {
+			log.warn("object is exist");
 			StatObjectResponse stat = minioClient.statObject(StatObjectArgs.builder()
 					.bucket(USER_BUCKET_NAME)
 					.object(path)
@@ -115,6 +116,16 @@ public class MinIORepository {
 			}
 			throw e;
 		}
+	}
+
+	public boolean isFolderExists(String path) throws IOException, MinioException, GeneralSecurityException{
+		Iterable<Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder()
+				.bucket(USER_BUCKET_NAME)
+				.prefix(path)
+				.recursive(false)
+				.maxKeys(1)
+				.build());
+		return results.iterator().hasNext();
 	}
 
 	public void copyObject(String sourcePath, String copyPath) throws IOException, MinioException, GeneralSecurityException {
