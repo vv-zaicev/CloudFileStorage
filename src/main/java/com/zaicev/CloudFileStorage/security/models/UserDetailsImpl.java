@@ -12,14 +12,20 @@ public class UserDetailsImpl implements UserDetails {
 
 	private String username;
 	private String password;
+	private Long id;
 	private Set<String> roles = new HashSet<String>();
 	
 	
 
-	public UserDetailsImpl(String username, String password, Set<String> roles) {
+	public UserDetailsImpl(String username, String password, Long id, Set<String> roles) {
 		this.username = username;
 		this.password = password;
+		this.id = id;
 		this.roles.addAll(roles);
+	}
+	
+	public Long getId() {
+		return id;
 	}
 
 	@Override
