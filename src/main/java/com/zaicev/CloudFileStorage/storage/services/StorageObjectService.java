@@ -1,17 +1,12 @@
 package com.zaicev.CloudFileStorage.storage.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
-import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
 
 @Service
 public class StorageObjectService {
-
-	@Autowired
-	private MinIORepository minIORepository;
 
 	private final String fullPathPattern = "user-%d-files/%s";
 
@@ -27,6 +22,10 @@ public class StorageObjectService {
 			storageObject.setPath(path.substring(0, path.lastIndexOf('/') + 1));
 		}
 		return storageObject;
+	}
+
+	public String getFullPath(String path, Long userId) {
+		return fullPathPattern.formatted(userId, path);
 	}
 
 }
