@@ -14,4 +14,6 @@ public class StorageObject {
 	private String path;
 	
 	private StorageObjectType type;
+	
+	private Long size;
 }
