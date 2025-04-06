@@ -167,7 +167,7 @@ public class MinIORepository {
 				.build());
 	}
 
-	public Iterable<Result<DeleteError>> deleteFiles(List<DeleteObject> objects) {
+	public Iterable<Result<DeleteError>> deleteObjects(List<DeleteObject> objects) {
 		return minioClient.removeObjects(RemoveObjectsArgs.builder()
 				.bucket(USER_BUCKET_NAME)
 				.objects(objects)
