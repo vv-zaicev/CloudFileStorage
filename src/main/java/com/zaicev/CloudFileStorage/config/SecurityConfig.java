@@ -44,12 +44,12 @@ public class SecurityConfig {
 				.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(
 						auth -> auth
-								.requestMatchers("/api/auth/signup", "/api/auth/signin", "/api/auth/signout")
+								.requestMatchers("/api/auth/*")
 								.permitAll()
 								.anyRequest()
 								.authenticated())
 				.formLogin(form -> form
-						.loginProcessingUrl("/api/auth/signin")
+						.loginProcessingUrl("/auth/signin")
 						.successHandler((request, response, auth) -> {
 							response.setStatus(200);
 							response.getWriter().write("Succes");
@@ -59,7 +59,7 @@ public class SecurityConfig {
 							response.getWriter().write("Denied");
 						}))
 				.logout(logout -> logout
-						.logoutUrl("/api/auth/signout"))
+						.logoutUrl("/auth/signout"))
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 

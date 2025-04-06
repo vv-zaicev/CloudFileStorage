@@ -9,7 +9,7 @@ import com.zaicev.CloudFileStorage.dto.UserDTO;
 import com.zaicev.CloudFileStorage.security.models.UserDetailsImpl;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 public class UserController {
 	@GetMapping("/me")
 	public UserDTO getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl) {

@@ -13,7 +13,7 @@ import com.zaicev.CloudFileStorage.dto.UserDTO;
 import com.zaicev.CloudFileStorage.security.services.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class SecurityController {
 	
 	@Autowired
