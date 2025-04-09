@@ -1,11 +1,56 @@
 package com.zaicev.CloudFileStorage.storage.services;
 
-import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.zaicev.CloudFileStorage.storage.exception.StorageObjectNotFound;
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
-import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
+import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
+
+import io.minio.errors.MinioException;
 
 @Service
 public class FileService {
+	@Autowired
+	private MinIORepository minIORepository;
 
+	@Autowired
+	private PathService pathService;
+
+	public StorageObject getFileInfo(String path) throws IOException, MinioException, GeneralSecurityException {
+		StorageObject storageObject = pathService.getStorageObjectFromFullPath(path);
+		storageObject.setSize(minIORepository.getObjectSize(path));
+		return storageObject;
+	}
+
+	public ByteArrayResource getFile(String path) throws IOException, MinioException, GeneralSecurityException {
+		try (InputStream inputStream = minIORepository.getObject(path)) {
+			ByteArrayResource byteArrayResource = new ByteArrayResource(inputStream.readAllBytes());
+			return byteArrayResource;
+		}
+	}
+
+	public void removeFile(String path) throws IOException, MinioException, GeneralSecurityException {
+		if (!minIORepository.isObjectExist(path)) {
+			throw new StorageObjectNotFound(path);
+		}
+		minIORepository.deleteObject(path);
+	}
+
+	public StorageObject moveFile(String currentPath, String newPath) throws IOException, MinioException, GeneralSecurityException {
+		minIORepository.moveObject(currentPath, newPath);
+		return getFileInfo(newPath);
+	}
+	
+	public List<StorageObject> uploadFile(String path, MultipartFile multipartFile) throws IOException, MinioException, GeneralSecurityException {
+		minIORepository.uploadFile(path, multipartFile);
+		return List.of(getFileInfo(path));
+	}
 }

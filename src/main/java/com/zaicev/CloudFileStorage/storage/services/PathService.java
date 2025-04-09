@@ -9,12 +9,16 @@ import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
 public class PathService {
 	
 	private final String fullPathPattern = "user-%d-files/%s";
+	
+	public StorageObject getStorageObjectFromFullPath(String fullPath) {
+		return getStorageObjectFromPath(fullPath.substring(fullPath.indexOf('/') + 1));
+	}
 
 	public StorageObject getStorageObjectFromPath(String path) {
 		StorageObject storageObject = new StorageObject();
 		storageObject.setType(StorageObjectType.DIRECTORY);
 		storageObject.setName(getResourceName(path));
-		storageObject.setPath(getResourcePath(path));
+		storageObject.setPath(getResourcePathWitouthResourceName(path));
 		return storageObject;
 	}
 
@@ -34,7 +38,7 @@ public class PathService {
 		}
 	}
 
-	public String getResourcePath(String path) {
+	public String getResourcePathWitouthResourceName(String path) {
 		if (path.endsWith("/")) {
 			return path.substring(0, path.lastIndexOf('/', path.length() - 2) + 1);
 		} else {

@@ -1,13 +1,68 @@
 package com.zaicev.CloudFileStorage.storage.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
 
-import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.zaicev.CloudFileStorage.storage.models.StorageObject;
+import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
+
+import io.minio.errors.MinioException;
+
 
 @Service
-public class FileService {
+public class ResourceService {
 	@Autowired
-	private MinIORepository minIORepository;
-		
+	private FileService fileService;
+	
+	@Autowired
+	private DirectoryService directoryService;
+
+	@Autowired
+	private PathService pathService;
+
+	public StorageObject getObjectInfo(String path) throws IOException, MinioException, GeneralSecurityException {
+		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
+			return fileService.getFileInfo(path);
+		} else {
+			return directoryService.getFolderInfo(path);
+		}
+	}
+	
+	public ByteArrayResource getObject(String path) throws IOException, MinioException, GeneralSecurityException{
+		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
+			return fileService.getFile(path);
+		} else {
+			return directoryService.getFolder(path);
+		}
+	}
+
+	public void removeObject(String path) throws IOException, MinioException, GeneralSecurityException {
+		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
+			fileService.removeFile(path);
+		} else {
+			directoryService.removeFolder(path);
+		}
+	}
+	
+	public StorageObject moveObject(String currentPath, String newPath) throws IOException, MinioException, GeneralSecurityException {
+		if (pathService.getStorageObjectType(currentPath) == StorageObjectType.FILE) {
+			return fileService.moveFile(currentPath, newPath);
+		} else {
+			return directoryService.moveFolder(currentPath, newPath);
+		}
+	}
+	
+	public List<StorageObject> uploadObject(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException{
+		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
+			return fileService.uploadFile(path, files.get(0));
+		} else {
+			return directoryService.uploadFolder(path, files);
+		}
+	}
 }
