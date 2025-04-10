@@ -3,6 +3,7 @@ package com.zaicev.CloudFileStorage.storage.services;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,9 @@ import com.zaicev.CloudFileStorage.storage.exception.StorageObjectNotFound;
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
 
+import io.minio.Result;
 import io.minio.errors.MinioException;
+import io.minio.messages.Item;
 
 @Service
 public class FileService {
@@ -52,5 +55,21 @@ public class FileService {
 	public List<StorageObject> uploadFile(String path, MultipartFile multipartFile) throws IOException, MinioException, GeneralSecurityException {
 		minIORepository.uploadFile(path, multipartFile);
 		return List.of(getFileInfo(path));
+	}
+	
+	public List<StorageObject> searchFiles(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
+		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
+		List<StorageObject> findFiles = new ArrayList<>();
+		
+		for (Result<Item> result : results) {
+			Item item = result.get();
+			StorageObject storageObject = pathService.getStorageObjectFromFullPath(item.objectName());
+			if (storageObject.getName().toLowerCase().contains(query.toLowerCase())) {
+				storageObject.setSize(item.size());
+				findFiles.add(storageObject);
+			}
+		}
+		
+		return findFiles;
 	}
 }

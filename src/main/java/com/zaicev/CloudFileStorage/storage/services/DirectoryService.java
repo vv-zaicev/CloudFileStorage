@@ -1,13 +1,12 @@
 package com.zaicev.CloudFileStorage.storage.services;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -115,5 +114,26 @@ public class DirectoryService {
 		minIORepository.uploadFolder(objects);
 		
 		return result;
+	}
+	
+	public HashSet<StorageObject> searchFolders(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
+		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
+		HashSet<StorageObject> findFolders = new HashSet<>();
+	    
+		for (Result<Item> result : results) {
+			Item item = result.get();
+			String[] pathElements = item.objectName().split("/");
+			StringBuilder currentPath = new StringBuilder();
+			for(int i = 1; i < pathElements.length - 1; i++) {
+				currentPath.append(pathElements[i] + "/");
+				if(pathElements[i].toLowerCase().contains(query.toLowerCase())) {
+					findFolders.add(pathService.getStorageObjectFromPath(currentPath.toString()));
+				}
+			}
+			
+		}
+		
+		return findFolders;
+
 	}
 }

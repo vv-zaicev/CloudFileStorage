@@ -2,6 +2,7 @@ package com.zaicev.CloudFileStorage.storage.services;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,4 +66,13 @@ public class ResourceService {
 			return directoryService.uploadFolder(path, files);
 		}
 	}
+	
+	
+	public List<StorageObject> searchObjects(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
+		List<StorageObject> result = new ArrayList<>();
+		result.addAll(fileService.searchFiles(userPath, query));
+		result.addAll(directoryService.searchFolders(userPath, query));
+		return result;
+	}
+	
 }

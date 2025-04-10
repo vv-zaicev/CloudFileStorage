@@ -79,6 +79,13 @@ public class ResourceController {
 		return storageObject;
 	}
 	
+	@GetMapping("/search")
+	public List<StorageObject> searchObjects(String query, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
+		String userPath = pathService.getFullPath("", userDetailsImpl.getId());
+		
+		return resourceService.searchObjects(userPath, query);
+	}
+	
 	@PostMapping()
 	public List<StorageObject> uploadResource(String path, @RequestBody List<MultipartFile> files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
 		String fullPath = pathService.getFullPath(path, userDetailsImpl.getId());
