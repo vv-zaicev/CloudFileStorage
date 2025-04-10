@@ -16,7 +16,7 @@ public class PathService {
 
 	public StorageObject getStorageObjectFromPath(String path) {
 		StorageObject storageObject = new StorageObject();
-		storageObject.setType(StorageObjectType.DIRECTORY);
+		storageObject.setType(getStorageObjectType(path));
 		storageObject.setName(getResourceName(path));
 		storageObject.setPath(getResourcePathWitouthResourceName(path));
 		return storageObject;
