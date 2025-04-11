@@ -47,7 +47,7 @@ public class DirectoryController {
 	public StorageObject createFolder(String path, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception {
 		StorageObject storageObject;
 		try {
-			storageObject = directoryService.createFolder(pathService.getFullPath(path, userDetailsImpl.getId()))
+			storageObject = directoryService.createFolder(pathService.getFullPath(path, userDetailsImpl.getId()));
 		} catch (StorageObjectExist e) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, path);
 		}

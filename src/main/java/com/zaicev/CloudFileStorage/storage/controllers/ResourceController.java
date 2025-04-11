@@ -1,5 +1,6 @@
 package com.zaicev.CloudFileStorage.storage.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.zaicev.CloudFileStorage.security.models.UserDetailsImpl;
+import com.zaicev.CloudFileStorage.storage.exception.StorageObjectExist;
 import com.zaicev.CloudFileStorage.storage.exception.StorageObjectNotFound;
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
@@ -74,6 +76,8 @@ public class ResourceController {
 			storageObject = resourceService.moveObject(fullFromPath, fullToPath);
 		} catch (StorageObjectNotFound e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, from + " is not found");
+		} catch (StorageObjectExist e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, to);
 		}
 
 		return storageObject;
@@ -88,8 +92,15 @@ public class ResourceController {
 	
 	@PostMapping()
 	public List<StorageObject> uploadResource(String path, @RequestBody List<MultipartFile> files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
-		String fullPath = pathService.getFullPath(path, userDetailsImpl.getId());
-		return resourceService.uploadObject(fullPath, files);
+		List<StorageObject> storageObjects = new ArrayList<>();
+		try {
+			String fullPath = pathService.getFullPath(path, userDetailsImpl.getId());
+			storageObjects = resourceService.uploadObject(fullPath, files);
+		} catch (StorageObjectExist e) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, path);
+		}
+		
+		return storageObjects;
 	}
 
 	@DeleteMapping()
