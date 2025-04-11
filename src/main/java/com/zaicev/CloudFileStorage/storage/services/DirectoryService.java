@@ -16,6 +16,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zaicev.CloudFileStorage.storage.exception.StorageObjectExist;
 import com.zaicev.CloudFileStorage.storage.exception.StorageObjectNotFound;
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
@@ -85,6 +86,9 @@ public class DirectoryService {
 	}
 
 	public StorageObject moveFolder(String currentPath, String newPath) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isFolderExists(newPath)) {
+			throw new StorageObjectExist(newPath);
+		}
 		Iterable<Result<Item>> items = minIORepository.getFiles(currentPath, true);
 		for (Result<Item> item : items) {
 			String sourcePath = item.get().objectName();
@@ -94,6 +98,10 @@ public class DirectoryService {
 	}
 
 	public List<StorageObject> uploadFolder(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isFolderExists(path)) {
+			throw new StorageObjectExist(path);
+		}
+
 		List<SnowballObject> objects = new ArrayList<>();
 		List<StorageObject> result = new ArrayList<>();
 
@@ -138,6 +146,9 @@ public class DirectoryService {
 	}
 
 	public List<StorageObject> getAllFromPath(String directoryPath) throws IOException, MinioException, GeneralSecurityException {
+		if (!minIORepository.isFolderExists(directoryPath)) {
+			throw new StorageObjectNotFound(directoryPath);
+		}
 		Iterable<Result<Item>> results = minIORepository.getFiles(directoryPath, false);
 		List<StorageObject> objects = new ArrayList<>();
 
@@ -149,6 +160,9 @@ public class DirectoryService {
 	}
 
 	public StorageObject createFolder(String path) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isFolderExists(path)) {
+			throw new StorageObjectExist(path);
+		}
 		minIORepository.createFolder(path);
 		return getFolderInfo(path);
 	}
