@@ -60,6 +60,13 @@ public class SecurityConfig {
 						}))
 				.logout(logout -> logout
 						.logoutUrl("/auth/signout"))
+				.exceptionHandling(x -> x
+						.authenticationEntryPoint((request, response, authException) -> {
+							response.sendError(401, "Пользователь не авторизован");
+						})
+						.accessDeniedHandler((request, response, accessDeniedException) -> {
+							response.sendError(403, "Доступ запрещен");
+						}))
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
