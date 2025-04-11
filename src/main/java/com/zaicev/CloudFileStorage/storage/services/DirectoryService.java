@@ -93,7 +93,7 @@ public class DirectoryService {
 		return getFolderInfo(newPath);
 	}
 
-	public List<StorageObject> uploadFolder(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException{
+	public List<StorageObject> uploadFolder(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException {
 		List<SnowballObject> objects = new ArrayList<>();
 		List<StorageObject> result = new ArrayList<>();
 
@@ -110,30 +110,46 @@ public class DirectoryService {
 				log.error("Error while uploading file: {} {}", file.getOriginalFilename(), e);
 			}
 		}
-		
+
 		minIORepository.uploadFolder(objects);
-		
+
 		return result;
 	}
-	
-	public HashSet<StorageObject> searchFolders(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
+
+	public HashSet<StorageObject> searchFolders(String userPath, String query) throws IOException, MinioException, GeneralSecurityException {
 		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
 		HashSet<StorageObject> findFolders = new HashSet<>();
-	    
+
 		for (Result<Item> result : results) {
 			Item item = result.get();
 			String[] pathElements = item.objectName().split("/");
 			StringBuilder currentPath = new StringBuilder();
-			for(int i = 1; i < pathElements.length - 1; i++) {
+			for (int i = 1; i < pathElements.length - 1; i++) {
 				currentPath.append(pathElements[i] + "/");
-				if(pathElements[i].toLowerCase().contains(query.toLowerCase())) {
+				if (pathElements[i].toLowerCase().contains(query.toLowerCase())) {
 					findFolders.add(pathService.getStorageObjectFromPath(currentPath.toString()));
 				}
 			}
-			
+
 		}
-		
+
 		return findFolders;
 
+	}
+
+	public List<StorageObject> getAllFromPath(String directoryPath) throws IOException, MinioException, GeneralSecurityException {
+		Iterable<Result<Item>> results = minIORepository.getFiles(directoryPath, false);
+		List<StorageObject> objects = new ArrayList<>();
+
+		for (Result<Item> result : results) {
+			objects.add(pathService.getStorageObjectFromFullPath(result.get().objectName()));
+		}
+
+		return objects;
+	}
+
+	public StorageObject createFolder(String path) throws IOException, MinioException, GeneralSecurityException {
+		minIORepository.createFolder(path);
+		return getFolderInfo(path);
 	}
 }
