@@ -11,6 +11,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.zaicev.CloudFileStorage.storage.exception.StorageObjectExist;
 import com.zaicev.CloudFileStorage.storage.exception.StorageObjectNotFound;
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
@@ -48,11 +49,17 @@ public class FileService {
 	}
 
 	public StorageObject moveFile(String currentPath, String newPath) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isObjectExist(newPath)) {
+			throw new StorageObjectExist(newPath);
+		}
 		minIORepository.moveObject(currentPath, newPath);
 		return getFileInfo(newPath);
 	}
 	
 	public List<StorageObject> uploadFile(String path, MultipartFile multipartFile) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isObjectExist(path)) {
+			throw new StorageObjectExist(path);
+		}
 		minIORepository.uploadFile(path, multipartFile);
 		return List.of(getFileInfo(path));
 	}
