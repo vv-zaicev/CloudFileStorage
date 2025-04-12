@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 
+import com.zaicev.CloudFileStorage.security.handlers.AuthenticationSuccessHandlerImpl;
 import com.zaicev.CloudFileStorage.security.services.UserDetailsServiceImpl;
 
 @Configuration
@@ -50,10 +51,7 @@ public class SecurityConfig {
 								.authenticated())
 				.formLogin(form -> form
 						.loginProcessingUrl("/auth/signin")
-						.successHandler((request, response, auth) -> {
-							response.setStatus(200);
-							response.getWriter().write("Succes");
-						})
+						.successHandler(new AuthenticationSuccessHandlerImpl())
 						.failureHandler((request, response, ex) -> {
 							response.setStatus(401);
 							response.getWriter().write("Denied");
