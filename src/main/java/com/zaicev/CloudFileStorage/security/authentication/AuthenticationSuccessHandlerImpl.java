@@ -1,4 +1,4 @@
-package com.zaicev.CloudFileStorage.security.handlers;
+package com.zaicev.CloudFileStorage.security.authentication;
 
 import java.io.IOException;
 import java.util.Collections;
