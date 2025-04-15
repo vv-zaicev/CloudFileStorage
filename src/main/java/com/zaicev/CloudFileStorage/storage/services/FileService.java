@@ -8,7 +8,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.zaicev.CloudFileStorage.storage.exception.StorageObjectExist;
@@ -57,11 +59,12 @@ public class FileService {
 	}
 	
 	public List<StorageObject> uploadFile(String path, MultipartFile multipartFile) throws IOException, MinioException, GeneralSecurityException {
-		if (minIORepository.isObjectExist(path)) {
-			throw new StorageObjectExist(path);
+		String filePath = path + multipartFile.getOriginalFilename();
+		if (minIORepository.isObjectExist(filePath)) {
+			throw new StorageObjectExist(filePath);
 		}
-		minIORepository.uploadFile(path, multipartFile);
-		return List.of(getFileInfo(path));
+		minIORepository.uploadFile(filePath, multipartFile);
+		return List.of(getFileInfo(filePath));
 	}
 	
 	public List<StorageObject> searchFiles(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{

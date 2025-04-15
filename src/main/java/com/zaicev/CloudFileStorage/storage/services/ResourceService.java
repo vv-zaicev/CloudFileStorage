@@ -60,7 +60,7 @@ public class ResourceService {
 	}
 	
 	public List<StorageObject> uploadObject(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException{
-		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
+		if (files.size() == 1) {
 			return fileService.uploadFile(path, files.get(0));
 		} else {
 			return directoryService.uploadFolder(path, files);
