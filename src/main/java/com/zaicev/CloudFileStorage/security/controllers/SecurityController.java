@@ -2,6 +2,7 @@ package com.zaicev.CloudFileStorage.security.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +20,16 @@ public class SecurityController {
 	@Autowired
 	private AuthService authService;
 	
-	@PostMapping("/signup")
+	@PostMapping("/sign-up")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UserDTO signup(@RequestBody UserDTO userDTO)  {
 		authService.registerUser(userDTO);
+		userDTO.setPassword(null);
+		return userDTO;
+	}
+	
+	@PostMapping("/sign-in")
+	public UserDTO signin(@RequestBody UserDTO userDTO){
 		userDTO.setPassword(null);
 		return userDTO;
 	}
