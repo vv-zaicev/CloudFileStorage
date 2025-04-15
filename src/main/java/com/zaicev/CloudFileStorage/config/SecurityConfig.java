@@ -1,21 +1,30 @@
 package com.zaicev.CloudFileStorage.config;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.zaicev.CloudFileStorage.security.handlers.AuthenticationSuccessHandlerImpl;
+import com.zaicev.CloudFileStorage.security.authentication.AuthenticationFailureHandlerImpl;
+import com.zaicev.CloudFileStorage.security.authentication.AuthenticationSuccessHandlerImpl;
+import com.zaicev.CloudFileStorage.security.authentication.JsonAuthFilter;
 import com.zaicev.CloudFileStorage.security.services.UserDetailsServiceImpl;
 
 @Configuration
@@ -40,22 +49,26 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
+		return httpSecurity.getSharedObject(AuthenticationManagerBuilder.class)
+				.authenticationProvider(authenticationProvider())
+				.build();
+	}
+
+	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity
 				.csrf(csrf -> csrf.disable())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(
 						auth -> auth
-								.requestMatchers("/api/auth/*")
+								.requestMatchers("/api/auth/*", "/api/actuator/mappings")
+								.permitAll()
+								.requestMatchers(HttpMethod.OPTIONS)
 								.permitAll()
 								.anyRequest()
 								.authenticated())
-				.formLogin(form -> form
-						.loginProcessingUrl("/auth/signin")
-						.successHandler(new AuthenticationSuccessHandlerImpl())
-						.failureHandler((request, response, ex) -> {
-							response.setStatus(401);
-							response.getWriter().write("Denied");
-						}))
+				.addFilterBefore(jsonAuthFilter(authenticationManager(httpSecurity)), UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout
 						.logoutUrl("/auth/signout"))
 				.exceptionHandling(x -> x
@@ -72,10 +85,25 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	SpringSessionRememberMeServices rememberMeServices() {
-		SpringSessionRememberMeServices rememberMeServices = new SpringSessionRememberMeServices();
-		rememberMeServices.setAlwaysRemember(true);
-		return rememberMeServices;
+	JsonAuthFilter jsonAuthFilter(AuthenticationManager authenticationManager) throws Exception {
+		JsonAuthFilter filter = new JsonAuthFilter("/auth/sign-in");
+		filter.setAuthenticationManager(authenticationManager);
+		filter.setAuthenticationSuccessHandler(new AuthenticationSuccessHandlerImpl());
+		filter.setAuthenticationFailureHandler(new AuthenticationFailureHandlerImpl());
+		return filter;
+	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(Arrays.asList("http://localhost:81"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
 
 }
