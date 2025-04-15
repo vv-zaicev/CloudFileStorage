@@ -24,7 +24,7 @@ public class PathService {
 
 	public String getResourceName(String path) {
 		if (path.endsWith("/")) {
-			return path.substring(path.lastIndexOf('/', path.length() - 2) + 1, path.length() - 1);
+			return path.substring(path.lastIndexOf('/', path.length() - 2) + 1, path.length());
 		} else {
 			return path.substring(path.lastIndexOf('/') + 1);
 		}
