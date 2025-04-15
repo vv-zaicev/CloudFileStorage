@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +28,11 @@ import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
 import com.zaicev.CloudFileStorage.storage.services.PathService;
 import com.zaicev.CloudFileStorage.storage.services.ResourceService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/resource")
+@Slf4j
 public class ResourceController {
 	@Autowired
 	private PathService pathService;
@@ -91,7 +95,8 @@ public class ResourceController {
 	}
 	
 	@PostMapping()
-	public List<StorageObject> uploadResource(String path, @RequestBody List<MultipartFile> files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
+	@ResponseStatus(HttpStatus.CREATED)
+	public List<StorageObject> uploadResource(String path, @RequestParam("object") List<MultipartFile> files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
 		List<StorageObject> storageObjects = new ArrayList<>();
 		try {
 			String fullPath = pathService.getFullPath(path, userDetailsImpl.getId());
