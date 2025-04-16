@@ -96,7 +96,7 @@ public class ResourceController {
 	
 	@PostMapping()
 	@ResponseStatus(HttpStatus.CREATED)
-	public List<StorageObject> uploadResource(String path, @RequestParam("object") List<MultipartFile> files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
+	public List<StorageObject> uploadResource(String path, @RequestParam("object") MultipartFile[] files, @AuthenticationPrincipal UserDetailsImpl userDetailsImpl) throws Exception{
 		List<StorageObject> storageObjects = new ArrayList<>();
 		try {
 			String fullPath = pathService.getFullPath(path, userDetailsImpl.getId());

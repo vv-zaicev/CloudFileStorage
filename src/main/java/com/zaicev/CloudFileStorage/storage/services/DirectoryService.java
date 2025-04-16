@@ -97,8 +97,8 @@ public class DirectoryService {
 		return getFolderInfo(newPath);
 	}
 
-	public List<StorageObject> uploadFolder(String path, List<MultipartFile> files) throws IOException, MinioException, GeneralSecurityException {
-		if (minIORepository.isFolderExists(path)) {
+	public List<StorageObject> uploadFolder(String path, MultipartFile[] files) throws IOException, MinioException, GeneralSecurityException {
+		if (minIORepository.isFolderExists(path + pathService.getRootDirectory(files[0].getOriginalFilename()))) {
 			throw new StorageObjectExist(path);
 		}
 
@@ -107,7 +107,6 @@ public class DirectoryService {
 
 		for (MultipartFile file : files) {
 			String fullFilePath = path + file.getOriginalFilename();
-
 			StorageObject storageObject = pathService.getStorageObjectFromFullPath(fullFilePath);
 			storageObject.setSize(file.getSize());
 			result.add(storageObject);
