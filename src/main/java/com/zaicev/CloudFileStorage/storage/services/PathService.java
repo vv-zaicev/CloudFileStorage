@@ -49,4 +49,8 @@ public class PathService {
 	public String getFullPath(String path, Long userId) {
 		return fullPathPattern.formatted(userId, path);
 	}
+	
+	public String getRootDirectory(String path) {
+		return path.substring(0, path.indexOf('/'));
+	}
 }
