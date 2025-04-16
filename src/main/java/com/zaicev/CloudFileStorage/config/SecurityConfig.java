@@ -3,6 +3,7 @@ package com.zaicev.CloudFileStorage.config;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,9 @@ public class SecurityConfig {
 
 	@Autowired
 	private UserDetailsServiceImpl userDetailsServiceImpl;
+	
+	@Value("${FRONTEND_URL}")
+	private String frontendURL;
 
 	@Bean
 	PasswordEncoder passwordEncoder() {
@@ -96,7 +100,7 @@ public class SecurityConfig {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("http://localhost:81"));
+		configuration.setAllowedOrigins(Arrays.asList(frontendURL));
 		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(Arrays.asList("*"));
 		configuration.setAllowCredentials(true);
