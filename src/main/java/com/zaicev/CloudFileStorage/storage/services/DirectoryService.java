@@ -152,9 +152,11 @@ public class DirectoryService {
 		List<StorageObject> objects = new ArrayList<>();
 
 		for (Result<Item> result : results) {
-			objects.add(pathService.getStorageObjectFromFullPath(result.get().objectName()));
+			String fileName =  result.get().objectName();
+			if (!directoryPath.equals(fileName)) {
+				objects.add(pathService.getStorageObjectFromFullPath(fileName));
+			}
 		}
-
 		return objects;
 	}
 
