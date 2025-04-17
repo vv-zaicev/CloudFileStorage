@@ -26,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.zaicev.CloudFileStorage.security.authentication.AuthenticationFailureHandlerImpl;
 import com.zaicev.CloudFileStorage.security.authentication.AuthenticationSuccessHandlerImpl;
 import com.zaicev.CloudFileStorage.security.authentication.JsonAuthFilter;
+import com.zaicev.CloudFileStorage.security.authentication.LogoutSuccessHandlerImpl;
 import com.zaicev.CloudFileStorage.security.services.UserDetailsServiceImpl;
 
 @Configuration
@@ -74,7 +75,10 @@ public class SecurityConfig {
 								.authenticated())
 				.addFilterBefore(jsonAuthFilter(authenticationManager(httpSecurity)), UsernamePasswordAuthenticationFilter.class)
 				.logout(logout -> logout
-						.logoutUrl("/auth/signout"))
+						.logoutUrl("/auth/sign-out")
+						.logoutSuccessHandler(new LogoutSuccessHandlerImpl())
+						.invalidateHttpSession(true)
+						.deleteCookies("SESSION"))
 				.exceptionHandling(x -> x
 						.authenticationEntryPoint((request, response, authException) -> {
 							response.sendError(401, "Пользователь не авторизован");
