@@ -36,6 +36,10 @@ public class DirectoryController {
 		try {
 			 storageObjects = directoryService.getAllFromPath(pathService.getFullPath(path, userDetailsImpl.getId()));
 		} catch (StorageObjectNotFound e) {
+			if (path.isEmpty()) {
+				directoryService.createFolder(pathService.getFullPath(path, userDetailsImpl.getId()));
+				return storageObjects;
+			}
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, path);
 		}
 		
