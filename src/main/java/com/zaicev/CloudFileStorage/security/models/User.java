@@ -1,5 +1,6 @@
 package com.zaicev.CloudFileStorage.security.models;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.CollectionTable;
@@ -21,18 +22,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(unique = true, nullable = false)
 	private String username;
-	
+
 	@Column(nullable = false)
 	private String password;
-	
+
 	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_roles")
-	private Set<String> roles;
+	private Set<String> roles = new HashSet<>();
 }
