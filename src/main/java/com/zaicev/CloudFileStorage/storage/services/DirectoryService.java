@@ -123,27 +123,6 @@ public class DirectoryService {
 		return result;
 	}
 
-	public HashSet<StorageObject> searchFolders(String userPath, String query) throws IOException, MinioException, GeneralSecurityException {
-		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
-		HashSet<StorageObject> findFolders = new HashSet<>();
-
-		for (Result<Item> result : results) {
-			Item item = result.get();
-			String[] pathElements = item.objectName().split("/");
-			StringBuilder currentPath = new StringBuilder();
-			for (int i = 1; i < pathElements.length - 1; i++) {
-				currentPath.append(pathElements[i] + "/");
-				if (pathElements[i].toLowerCase().contains(query.toLowerCase())) {
-					findFolders.add(pathService.getStorageObjectFromPath(currentPath.toString()));
-				}
-			}
-
-		}
-
-		return findFolders;
-
-	}
-
 	public List<StorageObject> getAllFromPath(String directoryPath) throws IOException, MinioException, GeneralSecurityException {
 		if (!minIORepository.isFolderExists(directoryPath)) {
 			throw new StorageObjectNotFound(directoryPath);

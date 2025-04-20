@@ -12,8 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.zaicev.CloudFileStorage.storage.models.StorageObject;
 import com.zaicev.CloudFileStorage.storage.models.StorageObjectType;
+import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
 
+import io.minio.Result;
 import io.minio.errors.MinioException;
+import io.minio.messages.Item;
 
 
 @Service
@@ -26,6 +29,9 @@ public class ResourceService {
 
 	@Autowired
 	private PathService pathService;
+	
+	@Autowired
+	private MinIORepository minIORepository;
 
 	public StorageObject getObjectInfo(String path) throws IOException, MinioException, GeneralSecurityException {
 		if (pathService.getStorageObjectType(path) == StorageObjectType.FILE) {
@@ -69,10 +75,21 @@ public class ResourceService {
 	
 	
 	public List<StorageObject> searchObjects(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
-		List<StorageObject> result = new ArrayList<>();
-		result.addAll(fileService.searchFiles(userPath, query));
-		result.addAll(directoryService.searchFolders(userPath, query));
-		return result;
+		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
+		List<StorageObject> findFiles = new ArrayList<>();
+		
+		for (Result<Item> result : results) {
+			Item item = result.get();
+			StorageObject storageObject = pathService.getStorageObjectFromFullPath(item.objectName());
+			if (storageObject.getName().toLowerCase().contains(query.toLowerCase())) {
+				if(storageObject.getType() == StorageObjectType.FILE) {
+					storageObject.setSize(item.size());
+				}
+				findFiles.add(storageObject);
+			}
+		}
+		
+		return findFiles;
 	}
 	
 }

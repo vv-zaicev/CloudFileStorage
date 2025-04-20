@@ -21,7 +21,9 @@ import com.zaicev.CloudFileStorage.storage.repository.MinIORepository;
 import io.minio.Result;
 import io.minio.errors.MinioException;
 import io.minio.messages.Item;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class FileService {
 	@Autowired
@@ -65,21 +67,5 @@ public class FileService {
 		}
 		minIORepository.uploadFile(filePath, multipartFile);
 		return List.of(getFileInfo(filePath));
-	}
-	
-	public List<StorageObject> searchFiles(String userPath, String query) throws IOException, MinioException, GeneralSecurityException{
-		Iterable<Result<Item>> results = minIORepository.getFiles(userPath, true);
-		List<StorageObject> findFiles = new ArrayList<>();
-		
-		for (Result<Item> result : results) {
-			Item item = result.get();
-			StorageObject storageObject = pathService.getStorageObjectFromFullPath(item.objectName());
-			if (storageObject.getName().toLowerCase().contains(query.toLowerCase())) {
-				storageObject.setSize(item.size());
-				findFiles.add(storageObject);
-			}
-		}
-		
-		return findFiles;
 	}
 }
