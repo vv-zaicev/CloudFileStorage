@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.zaicev.CloudFileStorage.dto.UserDTO;
+import com.zaicev.CloudFileStorage.dto.UserRequestDTO;
 import com.zaicev.CloudFileStorage.security.exceptions.UsernameAlreadyTakenException;
 import com.zaicev.CloudFileStorage.security.models.User;
 import com.zaicev.CloudFileStorage.security.repository.UserRepository;
@@ -28,26 +28,24 @@ public class AuthService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	public void registerUser(UserDTO userDTO, HttpServletRequest httpRequest) {
-		createUser(userDTO);
-		loginUser(userDTO, httpRequest);
+	public void registerUser(User user, HttpServletRequest httpRequest) {
+		createUser(user);
+		loginUser(user, httpRequest);
 	}
 
-	private void createUser(UserDTO userDTO) {
-		if (userRepository.existsByUsername(userDTO.getUsername())) {
-			throw new UsernameAlreadyTakenException(userDTO.getUsername());
+	private void createUser(User user) {
+		if (userRepository.existsByUsername(user.getUsername())) {
+			throw new UsernameAlreadyTakenException(user.getUsername());
 		}
 
-		User user = new User();
-		user.setUsername(userDTO.getUsername());
-		user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
 
 		userRepository.save(user);
 	}
 
-	private void loginUser(UserDTO userDTO, HttpServletRequest httpRequest) {
+	private void loginUser(User user, HttpServletRequest httpRequest) {
 		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
+				.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
 		SecurityContext context = SecurityContextHolder.getContext();
 		context.setAuthentication(authentication);
