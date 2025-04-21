@@ -1,22 +1,21 @@
 package com.zaicev.CloudFileStorage.dto.mappers;
 
-import com.zaicev.CloudFileStorage.dto.UserDTO;
+import com.zaicev.CloudFileStorage.dto.UserRequestDTO;
+import com.zaicev.CloudFileStorage.dto.UserResponseDTO;
 import com.zaicev.CloudFileStorage.security.models.User;
 
-public class UserMapperDTO implements MapperDTO<UserDTO, User> {
+public class UserMapperDTO {
 
-	@Override
-	public User getObject(UserDTO dto) {
+	public User getObjectFromRequestDTO(UserRequestDTO dto) {
 		User user = new User();
 		user.setUsername(dto.getUsername());
 		user.setPassword(dto.getPassword());
 		return user;
 	}
 
-	@Override
-	public UserDTO toDTO(User user) {
-		UserDTO dto = new UserDTO(user.getUsername(), user.getPassword());
+	public UserResponseDTO getResponseDTOFromObject(User user) {
+		UserResponseDTO dto = new UserResponseDTO(user.getUsername());
 		return dto;
 	}
-	
+
 }
