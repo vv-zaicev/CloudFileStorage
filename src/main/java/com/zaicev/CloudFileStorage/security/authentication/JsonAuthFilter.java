@@ -9,7 +9,7 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaicev.CloudFileStorage.dto.UserDTO;
+import com.zaicev.CloudFileStorage.dto.UserRequestDTO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class JsonAuthFilter extends AbstractAuthenticationProcessingFilter {
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException, ServletException {
-		UserDTO userDTO = objectMapper.readValue(request.getInputStream(), UserDTO.class);
+		UserRequestDTO userDTO = objectMapper.readValue(request.getInputStream(), UserRequestDTO.class);
 		
 		return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
 	}
