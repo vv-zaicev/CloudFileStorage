@@ -1,0 +1,35 @@
+openapi: 3.1.3
+info:
+   title: CloudFileStorage
+   description: Это простой проект, который представляет собой многопользовательское файловое облоко. Пользователи сервиса могут использовать его для загрузки и хранения файлов.
+   version: 1.0.0
+   
+paths:
+  /resource:
+    get:
+      summary: Возвращает информацию о объекте хранения
+      tags:
+        - ResourceController
+      responses:
+        "200":
+          description: Информация о объекте хранения
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/StorageObject"
+                
+
+components:
+  schemas:
+    StorageObject:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+          enum: [DIRECTORY, FILE]
+        size:
+          type: integer
