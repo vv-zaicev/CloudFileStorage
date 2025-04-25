@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.zaicev.CloudFileStorage.dto.UserRequestDTO;
+import com.zaicev.CloudFileStorage.dto.mappers.UserMapperDTO;
 import com.zaicev.CloudFileStorage.security.exceptions.UsernameAlreadyTakenException;
 import com.zaicev.CloudFileStorage.security.models.User;
 import com.zaicev.CloudFileStorage.security.repository.UserRepository;
@@ -28,9 +30,11 @@ public class AuthService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	public void registerUser(User user, HttpServletRequest httpRequest) {
-		createUser(user);
-		loginUser(user, httpRequest);
+	private final UserMapperDTO userMapperDTO = new UserMapperDTO();
+
+	public void registerUser(UserRequestDTO userRequestDTO, HttpServletRequest httpRequest) {
+		createUser(userMapperDTO.getObjectFromRequestDTO(userRequestDTO));
+		loginUser(userRequestDTO, httpRequest);
 	}
 
 	private void createUser(User user) {
@@ -43,10 +47,10 @@ public class AuthService {
 		userRepository.save(user);
 	}
 
-	private void loginUser(User user, HttpServletRequest httpRequest) {
+	private void loginUser(UserRequestDTO userRequestDTO, HttpServletRequest httpRequest) {
 		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-
+				.authenticate(new UsernamePasswordAuthenticationToken(userRequestDTO.getUsername(), userRequestDTO.getPassword()));
+		
 		SecurityContext context = SecurityContextHolder.getContext();
 		context.setAuthentication(authentication);
 		HttpSession session = httpRequest.getSession(true);

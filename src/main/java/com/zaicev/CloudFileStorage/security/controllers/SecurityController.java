@@ -27,15 +27,13 @@ public class SecurityController {
 	@Autowired
 	private AuthService authService;
 	
-	private final UserMapperDTO userMapperDTO = new UserMapperDTO();
 
 	@PostMapping("/sign-up")
 	@ResponseStatus(HttpStatus.CREATED)
 	public UserResponseDTO signup(@RequestBody UserRequestDTO userRequestDTO, HttpServletRequest httpServletRequest) throws Exception {
 		try {
-			User user = userMapperDTO.getObjectFromRequestDTO(userRequestDTO);
-			authService.registerUser(user, httpServletRequest);
-			return new UserResponseDTO(user.getUsername());
+			authService.registerUser(userRequestDTO, httpServletRequest);
+			return new UserResponseDTO(userRequestDTO.getUsername());
 		} catch (UsernameAlreadyTakenException e) {
 			log.warn("username taked");
 			throw new ResponseStatusException(HttpStatus.CONFLICT);
