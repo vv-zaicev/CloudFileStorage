@@ -3,7 +3,9 @@ info:
    title: CloudFileStorage
    description: Это простой проект, который представляет собой многопользовательское файловое облоко. Пользователи сервиса могут использовать его для загрузки и хранения файлов.
    version: 1.0.0
-   
+servers:
+  - url: 91.199.147.74:8080/api   
+    description: Основной сервер
 paths:
   /resource:
     get:
@@ -206,6 +208,154 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "500":
           $ref: "#/components/responses/InternalServerError"
+  /directory:
+    get:
+      summary: Получение содержимого папки
+      tags:
+        - DirectoryController
+      parameters:
+        - in: query
+          name: path
+          description: Путь к папке
+          required: true
+          schema:
+            type: string
+            example: newFolder/
+      responses:
+        "200":
+          description: Объекты успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StorageObject"
+              example:
+                - name: "folder/"
+                  path: "newFolder/"
+                  type: "DIRECTORY"
+                  size: null
+                - name: "second.docx"
+                  path: "newFolder/"
+                  type: "FILE"
+                  size: 1024
+        "404":
+          description: Папка не найдена
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorMessage"
+              example: 
+                message: "newFolder/ is not found"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+    post:
+      summary: создание пустой папки
+      tags:
+        - DirectoryController
+      parameters:
+        - in: query
+          name: path
+          description: путь до папки, которую нужно создать
+          required: true
+          schema:
+            type: string
+            example: newFolder/folder/
+      responses:
+        "200":
+          description: "Папка успешно создана"
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/StorageObject"
+              example: 
+                name: "folder/"
+                path: "newFolder/"
+                type: "DIRECTORY"
+                size: null
+        "409":
+          description: "Папка уже существует"
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorMessage"
+              example: 
+                message: "newFolder/folder/ is exist"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError" 
+
+  /auth/sign-up:
+    post:
+      summary: Регистрация пользователя
+      tags:
+        - SecurityController
+      requestBody:
+        description: Данные для регистрации
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/UserRequest"
+      responses:
+        "201":
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/UserResponse"
+        "409":
+          description: Пользователь с таким логином уже существует
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ErrorMessage"
+              example: 
+                message: "Пользователь с логином admin уже существует"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /auth/sign-in:
+    post:
+      summary: Авторизация пользователя
+      tags:
+        - SecurityController
+      requestBody:
+        description: Данные для авторизации
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: "#/components/schemas/UserRequest"
+      responses:
+        "200":
+          description: Пользователь успешно авторизован
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /user/me:
+    get:
+      summary: Получение текущего пользователя
+      tags:
+        - UserController
+      responses:
+        "200":
+          description: Получен текущий пользователь
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   schemas:
@@ -230,6 +380,21 @@ components:
       properties:
         message:
           type: string
+    UserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "admin"
+        password:
+          type: string
+          example: "admin"
+    UserResponse:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "admin"
   examples:
     FirstDoc:
       value:
