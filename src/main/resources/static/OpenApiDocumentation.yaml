@@ -10,14 +10,202 @@ paths:
       summary: Возвращает информацию о объекте хранения
       tags:
         - ResourceController
+      parameters:
+        - in: query
+          name: path
+          required:  true
+          schema: 
+            type: string
+            example: "newFolder/first.docx"
+          description: Путь до объекта хранения. Путь до директории должен заканчиваться '/'
       responses:
         "200":
           description: Информация о объекте хранения
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/StorageObject"
-                
+                $ref: "#/components/schemas/StorageObject"                   
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/notFoundResource"       
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: Загрузка файлов
+      tags:
+      - ResourceController
+      parameters:
+        - in: query
+          name: path
+          required: true
+          schema: 
+            type: string
+            example: newFolder/
+          description: Путь куда будет загружен файл
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                object:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: список файлов для загрузки
+      responses:
+        "201":
+          description: Файлы успешно загружены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StorageObject"
+              example:
+                - name: "first.docx"
+                  path: "newFolder/"
+                  type: "FILE"
+                  size: 1024
+                - name: "second.docx"
+                  path: "newFolder/"
+                  type: "FILE"
+                  size: 1024
+        "409":
+          $ref: "#/components/responses/resourceIsExist"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+    delete:
+      summary: удаление объектов хранения
+      tags:
+        - ResourceController
+      parameters:
+        - in: query
+          name: path
+          required: true
+          schema: 
+            type: string
+            example: "newFolder/first.docx"
+          description: путь до объекта который нужно удалить
+      responses:
+        "204":
+          description: "Объект был удален"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/notFoundResource"       
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  
+  /resource/download:
+    get:
+      summary: скачивание файлов
+      description: для папки вернется zip архив
+      tags:
+        - ResourceController
+      parameters:
+        - in: query
+          name: path
+          required: true
+          schema: 
+            type: string
+            example: "newFolder/first.docx"
+          description: путь до объекта который нужно скачать
+      responses:
+        "200":
+          description: "объект был скачан"
+          content:
+            application/octet-stream:
+              schema: 
+                type: string
+                format: binary
+              example: 
+                "Файл в бинарном виде"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/notFoundResource"       
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /resource/move:
+    get:
+      summary: перемещение объектов хранения
+      description: для переименования объекта также использовать этот метод
+      tags:
+        - ResourceController
+      parameters:
+        - in: query
+          name: from
+          required: true
+          schema: 
+            type: string
+            example: "newFolder/first.docx"
+          description: Путь для объекта который нужно перемистить/переименовать
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+            example: "newFolder/second.docx"
+      responses:
+        "200":
+          description: Объект был перемещен/изменен. Возвращает объект после изменения
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/StorageObject" 
+              example: 
+                name: "Second.docx"
+                path: "newFolder/"
+                type: "FILE"
+                size: 1024
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/notFoundResource"
+        "409":
+          $ref: "#/components/responses/resourceIsExist"      
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /resource/search:
+    get:
+      summary: Поиск по объектам
+      tags:
+        - ResourceController
+      parameters:
+        - in: query
+          name: query
+          description: Поисковый запрос
+          required: true
+          schema: 
+            type: string
+            example: "new"
+      responses:
+        "200":
+          description: Поиск прошел успешно. В ответе результаты поиска
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StorageObject"
+              example:
+                - name: "newerDocument.docx"
+                  path: ""
+                  type: "FILE"
+                  size: 1024
+                - name: "newFolder/"
+                  path: "folder/"
+                  type: "DIRECTORY"
+                  size: null
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   schemas:
@@ -26,10 +214,65 @@ components:
       properties:
         name:
           type: string
+          example: "first.docx"
         path:
           type: string
+          example: "newFolder/"
         type:
           type: string
           enum: [DIRECTORY, FILE]
         size:
           type: integer
+          example: 1024
+          description: размер возвращается в КБ
+    ErrorMessage:
+      type: object
+      properties:
+        message:
+          type: string
+  examples:
+    FirstDoc:
+      value:
+        name: "first.docx"
+        path: "newFolder/"
+        type: "FILE"
+        size: 1024
+    SecondDoc:
+      value:
+        name: "second.docx"
+        path: "newFolder/"
+        type: "FILE"
+        size: 1024
+  responses:
+    Unauthorized:
+      description: Пользователь не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+          example:
+            message: "Пользователь не авторизован"
+    InternalServerError:
+      description: Ошибка на стороне сервера
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+          example:
+            message: "Внутрения ошибка"
+    notFoundResource:
+      description: Объект не был найден
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+          example: 
+            message: "newFolder/first.docx is not found"
+    resourceIsExist:
+      description: Файлы уже существуют по указанному пути
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorMessage"
+          example:
+            message: "newFolder/first.docx is exist"
