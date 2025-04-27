@@ -13,12 +13,15 @@ public class DataConfig {
 
 	@Value("${MINIO_ACCESS_KEY}")
 	private String accessToken;
+	
+	@Value("${MINIO_HOST}")
+	private String minioHost;
 
 	@Bean
 	MinioClient minioClient() {
 		return MinioClient
 				.builder()
-				.endpoint("localhost", 9000, false)
+				.endpoint(minioHost, 9000, false)
 				.credentials(accessToken, secretToken)
 				.build();
 	}
